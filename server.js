@@ -1,10 +1,15 @@
+//Require de Módulos Necessários
 const express = require("express");
 const session = require("express-session");
 const uuid = require("uuid").v4;
-const app = express();
+const Database = require("./models/dbModel");
 const routes = require("./routes");
 
-app.use(session({
+//Instanciando servidor Express
+const app = express();
+
+//Estabelecendo sessão para uso de cookies
+/*app.use(session({
     genid: (request) => {
       return uuid();
     },
@@ -12,18 +17,21 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: null }
-}));
+}));*/
 
+//Referenciando rotas e pasta pública
 app.use(express.static("./public"));
 app.use(express.urlencoded({extended: true}));
+app.use(express.json());
 app.use(routes);
 
-app.set("view engine", "ejs");
-app.set("views", "./src/views");
-
+//Inicializando servidor
 app.listen(porta = 8000, () => {
     console.log("Servidor executando na porta "
         + porta);
 });
+
+//Instanciando banco de dados
+db = new Database("Phi4Free");
 
 
