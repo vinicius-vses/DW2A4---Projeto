@@ -21,6 +21,10 @@ module.exports.lerArtigoGet = async (request, response) => {
     response.send(await db.readArt(id));
 };
 
+module.exports.listaArtigosGet = async (request, response) => {
+    response.send(await db.listArt());
+};
+
 module.exports.updateArtigoPut = async (request, response) => {
     artigo = request.body;
     response.send(await db.updateArt(artigo));
@@ -30,7 +34,3 @@ module.exports.excluirArtigoDelete = async (request, response) => {
     id = request.params.id;
     response.send(await db.deleteArt(id));
 }
-
-module.exports.todosArtigosGet = (request, response) => {
-
-};
