@@ -22,7 +22,7 @@ class Login {
         } else {
             const jwt = require('jsonwebtoken');
             const token = jwt.sign({ id }, process.env.SECRET, {
-                expiresIn: 600 // expires in 10min
+                expiresIn: 86400 // expires in 10min
               });
              return JSON.stringify({auth: true, token: token});
         }
