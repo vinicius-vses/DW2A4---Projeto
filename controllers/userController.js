@@ -5,17 +5,18 @@ module.exports.verPerfilGet = async (request, response) => {
     response.send(await db.readUser(id));
 };
 
-module.exports.atualizarPerfilPut = async (request, response) => {
+module.exports.atualizarPerfilPut = async (request, response, next) => {
     user = request.body;
     response.send(await db.updateUser(user));
 };
 
-module.exports.criarPerfilPost = async (request, response) => {
+module.exports.criarPerfilPost = async (request, response, next) => {
     user = request.body;
-    response.send(await db.createUser(user));
+    request.user = await db.createUser(user);
+    next();
 };
 
-module.exports.deletarPerfilDelete = async (request, response) => {
+module.exports.deletarPerfilDelete = async (request, response, next) => {
     id = request.params.id;
     response.send(await db.deleteUser(id));
 };

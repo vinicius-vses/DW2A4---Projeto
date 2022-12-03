@@ -9,9 +9,10 @@ module.exports.criarArtigoGet = (request, response) => {
     }
 };
 
-module.exports.criarArtigoPost = async (request, response) => {
+module.exports.criarArtigoPost = async (request, response, next) => {
     //user = request.session.user;
     artigo = request.body;
+    artigo.autorId = request.id;
     //db.createArt(user, artigo);
     response.send(await db.createArt(artigo));
 };
@@ -25,12 +26,12 @@ module.exports.listaArtigosGet = async (request, response) => {
     response.send(await db.listArt());
 };
 
-module.exports.updateArtigoPut = async (request, response) => {
+module.exports.updateArtigoPut = async (request, response, next) => {
     artigo = request.body;
     response.send(await db.updateArt(artigo));
 };
 
-module.exports.excluirArtigoDelete = async (request, response) => {
+module.exports.excluirArtigoDelete = async (request, response, next) => {
     id = request.params.id;
     response.send(await db.deleteArt(id));
 }

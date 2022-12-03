@@ -4,6 +4,8 @@ const session = require("express-session");
 const uuid = require("uuid").v4;
 const Database = require("./models/dbModel");
 const routes = require("./routes");
+const bodyParser = require('body-parser');
+require("dotenv-safe").config();
 
 //Instanciando servidor Express
 const app = express();
@@ -22,6 +24,7 @@ const app = express();
 //Referenciando rotas e pasta pública
 app.use(express.static("./public"));
 app.use(express.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(routes);
 

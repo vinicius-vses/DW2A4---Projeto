@@ -1,4 +1,4 @@
-const { json } = require("express");
+const { json, response } = require("express");
 const { JsonDB, Config } = require("node-json-db");
 const Artigo = require("./artigoModel");
 const User = require("./userModel");
@@ -14,6 +14,21 @@ class Database {
             this.db = new JsonDB(new Config(dbName, true, false, '/'));
         }
         
+    }
+
+    //AUTENTICAÇÃO DE LOGIN USUÁRIO
+    async authLogin(login) {
+        try {
+            let index = await this.db.getIndex("/users/array", login.email, "email");
+            let userBuffer = await this.db.getData("/users/array["+index+"]");
+            if (login.senha === userBuffer.senha) {
+                return userBuffer.id;
+            } else {
+                return -1;
+        }
+        } catch (error) {
+            return -1;
+        }
     }
 
     //CRUD USUÁRIO
@@ -33,7 +48,8 @@ class Database {
     async readUserFull(id) {
         let index = await this.db.getIndex("/users/array", parseInt(id), "id");
         if (index == -1) {
-            return "Erro 404: O usuário com o ID: " + id + " não foi encontrado no banco de dados...";
+            let res = {error: 404, message: "O usuário com o ID: " + id + " não foi encontrado no banco de dados..."};
+            return JSON.stringify(res);
         }
         let user = await this.db.getData("/users/array["+index+"]");
         return JSON.stringify(user);
@@ -43,7 +59,8 @@ class Database {
     async readUser(id) {
         let index = await this.db.getIndex("/users/array", parseInt(id), "id");
         if (index == -1) {
-            return "Erro 404: O usuário com o ID: " + id + " não foi encontrado no banco de dados...";
+            let res = {error: 404, message: "O usuário com o ID: " + id + " não foi encontrado no banco de dados..."};
+            return JSON.stringify(res);
         }
         let userBuffer = await this.db.getData("/users/array["+index+"]");
         let user = {
@@ -60,7 +77,8 @@ class Database {
     async updateUser(user) {
         let index = await this.db.getIndex("/users/array", user.id, "id");
         if (index == -1) {
-            return "Erro 404: O artigo com o ID: " + user.id + " não foi encontrado no banco de dados...";
+            let res = {error: 404, message: "O usuário com o ID: " + user.id + " não foi encontrado no banco de dados..."};
+            return JSON.stringify(res);
         }
         await this.db.push("/users/array[" + index + "]", user, true);
         return JSON.stringify(await this.db.getData("/users/array["+index+"]"));
@@ -70,7 +88,8 @@ class Database {
         let index = await this.db.getIndex("/users/array", parseInt(id), "id");
         //console.log(index);
         if (index == -1) {
-            return "Erro 404: O usuário com o ID: " + id + " não foi encontrado no banco de dados...";
+            let res = {error: 404, message: "O usuário com o ID: " + id + " não foi encontrado no banco de dados..."};
+            return JSON.stringify(res);
         }
         await this.db.delete("/users/array["+index+"]");
         index = await this.db.getIndex("/users/array", parseInt(id), "id");
@@ -80,16 +99,12 @@ class Database {
     }
 
     //CRUD ARTIGO
-    async createArt(artigo) { //faltando pegar o input de sessão do user para o id do autor
+    async createArt(artigo) {
         let contArtigo = await this.db.getData("/config/db/contArtigo");
         contArtigo++;
-        //console.log("Antes do push: " + await this.db.getData("/config/db/contArtigo"));
         await this.db.push("/config/db/contArtigo", contArtigo);
-        //console.log("Depois do push: " + await this.db.getData("/config/db/contArtigo"));
         
         const PUB_DATE = new Date();
-
-        //console.log(artigo);
         
         const NEW_ARTIGO = new Artigo(contArtigo, artigo.autorId, artigo.disciplina, artigo.titulo, artigo.conteudo, PUB_DATE, PUB_DATE);
         
@@ -98,38 +113,48 @@ class Database {
     }
 
     async readArt(id) {
-        let index = await this.db.getIndex("/artigos/array", parseInt(id), "id");
-        if (index == -1) {
-            return "Erro 404: O artigo com o ID: " + id + " não foi encontrado no banco de dados...";
+        try {
+            let index = await this.db.getIndex("/artigos/array", parseInt(id), "id");
+            if (index == -1) {
+                let res = {error: 404, message: "O artigo com o ID: " + id + " não foi encontrado no banco de dados..."};
+                return JSON.stringify(res);
+            }
+            let ARTIGO = await this.db.getData("/artigos/array["+index+"]");
+            return JSON.stringify(ARTIGO);
+        } catch (error) {
+            return {error: 404, message: "Não existem artigos para serem lidos..."};
         }
-        let ARTIGO = await this.db.getData("/artigos/array["+index+"]");
-        return JSON.stringify(ARTIGO);
     }
 
     async listArt() {
-        let ARTIGOS = await this.db.getData("/artigos");
-        //console.log(ARTIGOS.array[0]);
-        const length = ARTIGOS.array.length;
-        //console.log(length);
-        let LISTA_ARTIGOS = new Array; 
-        for (let i=0; i < length; i++) {
-            LISTA_ARTIGOS.push(
-                {
-                    idArtigo: ARTIGOS.array[i].id,
-                    autor: ARTIGOS.array[i].autorId,
-                    titulo: ARTIGOS.array[i].titulo
-                }
-            );
-            //console.log(LISTA_ARTIGOS[i]);
+        try {
+            let ARTIGOS = await this.db.getData("/artigos");
+            //console.log(ARTIGOS.array[0]);
+            const length = ARTIGOS.array.length;
+            //console.log(length);
+            let LISTA_ARTIGOS = new Array; 
+            for (let i=0; i < length; i++) {
+              LISTA_ARTIGOS.push(
+                    {
+                        idArtigo: ARTIGOS.array[i].id,
+                        autor: ARTIGOS.array[i].autorId,
+                        titulo: ARTIGOS.array[i].titulo
+                    }
+                );
+                //console.log(LISTA_ARTIGOS[i]);
+            }
+            return JSON.stringify(LISTA_ARTIGOS);
+        } catch (error) {
+            return {error: 404, message: "Não existem artigos para serem listados..."};
         }
-        return JSON.stringify(LISTA_ARTIGOS);
     }
 
     async updateArt(artigo) { //faltando pegar o input de sessão do user para o id do autor --- Será que precisa??
         artigo.dataEdt = new Date();
         let index = await this.db.getIndex("/artigos/array", artigo.id, "id");
         if (index == -1) {
-            return "Erro 404: O artigo com o ID: " + artigo.id + " não foi encontrado no banco de dados...";
+            let res = {error: 404, message: "O artigo com o ID: " + artigo.id + " não foi encontrado no banco de dados..."};
+            return JSON.stringify(res);
         }
         await this.db.push("/artigos/array[" + index + "]", artigo, true);
         return JSON.stringify(await this.db.getData("/artigos/array["+index+"]"));
@@ -140,7 +165,8 @@ class Database {
         let index = await this.db.getIndex("/artigos/array", parseInt(id), "id");
         //console.log(index);
         if (index == -1) {
-            return "Erro 404: O artigo com o ID: " + id + " não foi encontrado no banco de dados...";
+            let res = {error: 404, message: "O artigo com o ID: " + id + " não foi encontrado no banco de dados..."};
+            return JSON.stringify(res);
         }
         await this.db.delete("/artigos/array["+index+"]");
         index = await this.db.getIndex("/artigos/array", parseInt(id), "id");
