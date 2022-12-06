@@ -6,6 +6,7 @@ const Database = require("./models/dbModel");
 const routes = require("./routes");
 const bodyParser = require('body-parser');
 require("dotenv-safe").config();
+const cors = require("cors")
 
 //Instanciando servidor Express
 const app = express();
@@ -22,6 +23,7 @@ const app = express();
 }));*/
 
 //Referenciando rotas e pasta pública
+app.use(cors());
 app.use(express.static("./public"));
 app.use(express.urlencoded({extended: true}));
 app.use(bodyParser.json());
