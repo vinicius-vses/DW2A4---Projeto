@@ -136,9 +136,11 @@ class Database {
             for (let i=0; i < length; i++) {
               LISTA_ARTIGOS.push(
                     {
-                        idArtigo: ARTIGOS.array[i].id,
-                        autor: ARTIGOS.array[i].autorId,
-                        titulo: ARTIGOS.array[i].titulo
+                        id: ARTIGOS.array[i].id,
+                        idAutor: ARTIGOS.array[i].autorId,
+                        titulo: ARTIGOS.array[i].titulo,
+                        disciplina: ARTIGOS.array[i].disciplina,
+                        nomeAutor: await this.db.getData("/users/array", parseInt(ARTIGOS.array[i].autorId), "id").nome
                     }
                 );
                 //console.log(LISTA_ARTIGOS[i]);
