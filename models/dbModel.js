@@ -131,22 +131,26 @@ class Database {
             let ARTIGOS = await this.db.getData("/artigos");
             //console.log(ARTIGOS.array[0]);
             const length = ARTIGOS.array.length;
-            //console.log(length);
+            console.log(length);
             let LISTA_ARTIGOS = new Array; 
+            
             for (let i=0; i < length; i++) {
+                let index = await this.db.getIndex("/users/array", ARTIGOS.array[i].autorId, "id");
+                let autorName = await this.db.getData("/users/array["+index+"]/nome");
               LISTA_ARTIGOS.push(
                     {
                         id: ARTIGOS.array[i].id,
                         idAutor: ARTIGOS.array[i].autorId,
                         titulo: ARTIGOS.array[i].titulo,
                         disciplina: ARTIGOS.array[i].disciplina,
-                        nomeAutor: await this.db.getData("/users/array", parseInt(ARTIGOS.array[i].autorId), "id").nome
+                        nomeAutor: autorName
                     }
                 );
                 //console.log(LISTA_ARTIGOS[i]);
             }
             return JSON.stringify(LISTA_ARTIGOS);
         } catch (error) {
+            console.log(error);
             return {error: 404, message: "Não existem artigos para serem listados..."};
         }
     }
